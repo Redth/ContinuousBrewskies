@@ -25,19 +25,33 @@ namespace ContinuousBrewskies.UITests
             app = AppInitializer.StartApp (platform);
         }
 
+        //[Test]
+        public void Repl ()
+        {
+            app.Repl ();
+        }
+
         [Test]
         public void BeerListIsDisplayed ()
         {
-//            AppResult[] results = app.WaitForElement (c => c.Marked ("Welcome to Xamarin Forms!"));
-//            app.Screenshot ("Welcome screen.");
-//
-//            Assert.IsTrue (results.Any ());
+            var results = app.WaitForElement (c => c.Marked ("\"Ah Me Joy\" Porter"));
+
+            app.Screenshot ("List");
+
+            Assert.IsTrue (results.Any ());
         }
 
         [Test]
         public void NavigatedToBeerDetail ()
         {
+            app.Screenshot ("List");
 
+            app.Tap (c => c.Marked ("\"Ah Me Joy\" Porter"));
+
+            app.Screenshot ("Details");
+
+            var results = app.Query (c => c.Marked ("Back"));
+            Assert.IsTrue (results.Any ());
         }
     }
 }
