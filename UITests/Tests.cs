@@ -46,11 +46,13 @@ namespace ContinuousBrewskies.UITests
         {
             app.Screenshot ("List");
 
+            var results = app.WaitForElement (c => c.Marked ("\"Ah Me Joy\" Porter"));
+
             app.Tap (c => c.Marked ("\"Ah Me Joy\" Porter"));
 
             app.Screenshot ("Details");
 
-            var results = app.Query (c => c.Marked ("Back"));
+            results = app.Query (c => c.Marked ("Description"));
             Assert.IsTrue (results.Any ());
         }
     }

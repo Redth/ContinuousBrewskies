@@ -4,6 +4,7 @@ using System.Linq;
 
 using Foundation;
 using UIKit;
+using Xamarin.Forms;
 
 namespace ContinuousBrewskies.iOS
 {
@@ -12,12 +13,15 @@ namespace ContinuousBrewskies.iOS
     {
         public override bool FinishedLaunching (UIApplication app, NSDictionary options)
         {
-            global::Xamarin.Forms.Forms.Init ();
+            Forms.Init ();
 
-            // Code for starting up the Xamarin Test Cloud Agent
-            //#if ENABLE_TEST_CLOUD
-			Xamarin.Calabash.Start();
-            //#endif
+            Forms.ViewInitialized += (object sender, ViewInitializedEventArgs e) => {
+                // http://developer.xamarin.com/recipes/testcloud/set-accessibilityidentifier-ios/
+                if (null != e.View.StyleId)
+                    e.NativeView.AccessibilityIdentifier = e.View.StyleId;
+            };
+                
+            Xamarin.Calabash.Start();
 
             LoadApplication (new App ());
 
