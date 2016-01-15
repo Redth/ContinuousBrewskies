@@ -12,8 +12,8 @@ Task ("InjectKeys").Does (() =>
 	// Get the API Key from the Environment variable
 	var breweryDbApiKey = EnvironmentVariable ("BREWERY_DB_API_KEY") ?? "";
 
-	// Replace the placeholder in our .cs files
-	ReplaceTextInFiles ("./**/*.cs", "{BREWERY_DB_API_KEY}", breweryDbApiKey;
+	// Replace the placeholder in our Configuration.cs files
+	ReplaceTextInFiles ("./**/Configuration.cs", "{BREWERY_DB_API_KEY}", breweryDbApiKey);
 
 });
 
