@@ -27,11 +27,21 @@ Task ("TestCloudAndroid")
 	var testCloudExePath = GetFiles ("./**/test-cloud.exe").FirstOrDefault ();
 
 	// Build the .apk to test
-	var apk = AndroidPackage ("./Droid/ContinuousBrewskies.Droid.csproj", true);
+	var apk = AndroidPackage ("./Droid/ContinuousBrewskies.Droid.csproj", true, c => c.Configuration = "Release");
 
+	// Get our test cloud parameters from Environment variables set in CI
 	var xtcApiKey = EnvironmentVariable ("XTC_API_KEY") ?? "";
 	var xtcEmail = EnvironmentVariable ("XTC_EMAIL") ?? "";
 	var xtcDeviceSet = EnvironmentVariable ("XTC_DEVICES") ?? "";
+
+	// If there's a .xtc file, it will override the environment variables
+	// 1st line = XTC_API_KEY, 2nd = XTC_EMAIL, 3rd = XTC_DEVICES
+	if (FileExists ("./.xtc")) {
+		var xtcFile = FileReadLines ("./.xtc");
+		xtcApiKey = xtcFile [0];
+		xtcEmail = xtcFile [1];
+		xtcDeviceSet = xtcFile [2];
+	}
 
 	// Run testcloud
 	TestCloud (apk, xtcApiKey, xtcDeviceSet, xtcEmail, "./UITests/bin/Release/", new TestCloudSettings { ToolPath = testCloudExePath });
