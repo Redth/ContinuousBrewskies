@@ -15,9 +15,9 @@ namespace ContinuousBrewskies.iOS
             global::Xamarin.Forms.Forms.Init ();
 
             // Code for starting up the Xamarin Test Cloud Agent
-            #if ENABLE_TEST_CLOUD
+            //#if ENABLE_TEST_CLOUD
 			Xamarin.Calabash.Start();
-            #endif
+            //#endif
 
             LoadApplication (new App ());
 
