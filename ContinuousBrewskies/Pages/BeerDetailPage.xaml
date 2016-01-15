@@ -4,9 +4,11 @@
 		<ScrollView>
 			<StackLayout>
 
-			<Label x:Name="name" StyleId="DisplayName" Text="{Binding Beer.NameDisplay}"></Label>
+				<Label x:Name="name" StyleId="DisplayName" Text="{Binding Beer.NameDisplay}"></Label>
 
-			<Label x:Name="desc" StyleId="Description" Text="{Binding Beer.Description}"></Label>
+				<Label x:Name="name" StyleId="Brewery" Text="{Binding Beer.Brewery}"></Label>
+
+				<Label x:Name="desc" StyleId="Description" Text="{Binding Beer.Description}"></Label>
 
 			</StackLayout>
 		</ScrollView>
