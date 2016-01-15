@@ -63,7 +63,7 @@ fi
 # Download NuGet3 if it does not exist.
 if [ ! -f $NUGET3_EXE ]; then
     echo "Downloading NuGet3..."
-    curl -Lsfo $NUGET3_EXE https://dist.nuget.org/win-x86-commandline/latest/
+    curl -Lsfo $NUGET3_EXE https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
     if [ $? -ne 0 ]; then
         echo "An error occured while downloading nuget3.exe."
         exit 1

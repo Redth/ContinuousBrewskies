@@ -3,6 +3,25 @@
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
 
+// Try and find a test-cloud-exe from the installed nugets
+var testCloudExePath = GetFiles ("./**/test-cloud.exe").FirstOrDefault ();
+
+// Get our test cloud parameters from Environment variables set in CI
+var xtcApiKey = EnvironmentVariable ("XTC_API_KEY") ?? "";
+var xtcEmail = EnvironmentVariable ("XTC_EMAIL") ?? "";
+var xtcAndroidDevices = EnvironmentVariable ("XTC_DEVICES_ANDROID") ?? "";
+var xtciOSDevices = EnvironmentVariable ("XTC_DEVICES_IOS") ?? "";
+
+// If there's a .xtc file, it will override the environment variables
+// 1st line = XTC_API_KEY, 2nd = XTC_EMAIL, 3rd = XTC_DEVICES
+if (FileExists ("./.xtc")) {
+	var xtcFile = FileReadLines ("./.xtc");
+	xtcApiKey = xtcFile [0];
+	xtcEmail = xtcFile [1];
+	xtcAndroidDevices = xtcFile [2];
+	xtciOSDevices = xtcFile [3];
+}
+
 Task ("Default").Does (() =>
 {
 	NuGetRestore ("./ContinuousBrewskies.sln");
@@ -23,31 +42,36 @@ Task ("TestCloudAndroid")
 	.IsDependentOn ("Default")
 	.Does (() => 
 {
-	// Try and find a test-cloud-exe from the installed nugets
-	var testCloudExePath = GetFiles ("./**/test-cloud.exe").FirstOrDefault ();
-
 	// Build the .apk to test
 	var apk = AndroidPackage ("./Droid/ContinuousBrewskies.Droid.csproj", true, c => c.Configuration = "Release");
 
-	// Get our test cloud parameters from Environment variables set in CI
-	var xtcApiKey = EnvironmentVariable ("XTC_API_KEY") ?? "";
-	var xtcEmail = EnvironmentVariable ("XTC_EMAIL") ?? "";
-	var xtcDeviceSet = EnvironmentVariable ("XTC_DEVICES") ?? "";
-
-	// If there's a .xtc file, it will override the environment variables
-	// 1st line = XTC_API_KEY, 2nd = XTC_EMAIL, 3rd = XTC_DEVICES
-	if (FileExists ("./.xtc")) {
-		var xtcFile = FileReadLines ("./.xtc");
-		xtcApiKey = xtcFile [0];
-		xtcEmail = xtcFile [1];
-		xtcDeviceSet = xtcFile [2];
-	}
-
 	// Run testcloud
-	TestCloud (apk, xtcApiKey, xtcDeviceSet, xtcEmail, "./UITests/bin/Release/", new TestCloudSettings { ToolPath = testCloudExePath });
+	TestCloud (apk, xtcApiKey, xtcAndroidDevices, xtcEmail, "./UITests/bin/Release/", new TestCloudSettings { ToolPath = testCloudExePath });
 
 });
 
-Task ("TestCloud").IsDependentOn ("TestCloudAndroid");
+Task ("TestCloudiOS")
+	.WithCriteria (!IsRunningOnWindows ()) // Mac only
+	.Does (() => 
+{
+	// Build Project to produce an .ipa file
+	DotNetBuild ("./ContinuousBrewskies.sln", c => {
+		c.Configuration = "Release";
+		c.Properties.Add ("Platform", new List<string> { "iPhone" });
+		c.Properties.Add ("BuildIpa", new List<string> { "true" });
+		c.Targets.Add ("ContinuousBrewskies_iOS");
+	});
+
+	var ipa = GetFiles ("./**/iPhone/Release/**/*.ipa").FirstOrDefault ();
+
+	// Run testcloud
+	TestCloud (ipa, xtcApiKey, xtciOSDevices, xtcEmail, "./UITests/bin/Release/", new TestCloudSettings { ToolPath = testCloudExePath });
+
+});
+
+// Link both tasks together
+Task ("TestCloud")
+	.IsDependentOn ("TestCloudAndroid")
+	.IsDependentOn ("TestCloudiOS");
 
 RunTarget (TARGET);
